@@ -92,16 +92,26 @@ def product_detail(product_id):
 def add_to_cart(product_id):
     product = Product.query.get_or_404(product_id)
     qty = int(request.form.get('quantity', 1))
+    
     if qty > product.stock:
         return jsonify({"status": "error", "message": f"Only {product.stock} items left!"}), 400
+    
+    # 1. Ensure the cart dictionary exists in the session
     if 'cart' not in session:
         session['cart'] = {}
+        
+    # 2. Retrieve the cart from the session
     cart = session['cart']
+    
+    # 3. Update the cart
     p_id_str = str(product_id)
     cart[p_id_str] = cart.get(p_id_str, 0) + qty
-    session['cart'] = cart
+    
+    # 4. CRITICAL: Explicitly tell Flask the session has changed
+    session.modified = True 
+    
     return redirect(url_for('view_cart'))
-
+    
 @app.route('/cart')
 def view_cart():
     cart = session.get('cart', {})
