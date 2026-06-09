@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+
 {% block hero_section %}
     <h1 style="font-family: var(--font-fancy); font-size: 56px; color: var(--forest-green); margin: 10px 0; font-style: italic;">DAISY STITCH HOUSE</h1>
     <p style="font-size: 18px; max-width: 650px; margin: 0 auto; line-height: 1.6;">Pick your perfect crocheted companion from our collection of soft sweets and stuffed treats.</p>
@@ -8,11 +9,23 @@
 {% endblock %}
 
 {% block content %}
+<style>
+    /* Pop-out effect specific to this view */
+    .scrap-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .scrap-card:hover {
+        transform: rotate(0deg) scale(1.03) !important;
+        box-shadow: 8px 8px 0px var(--text-dark) !important;
+        z-index: 10;
+    }
+</style>
+
 <h2 style="font-family: var(--font-fancy); text-align: center; color: var(--dark-pink); font-size: 38px; margin-top: 0; margin-bottom: 45px;">Crochet O'Clock</h2>
 
 <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 40px;">
     {% for item in catalog %}
-    <div class="scrap-card" style="--tilt: {{ 1 if loop.index % 2 == 0 else -1 }}; display: flex; flex-direction: column; justify-content: space-between;">
+    <div class="scrap-card" style="--tilt: {{ 1 if loop.index % 2 == 0 else -1 }}; display: flex; flex-direction: column; justify-content: space-between; padding: 15px;">
         <div style="position: relative;">
             <div style="border: 2px solid var(--text-dark); overflow: hidden; height: 240px; background: #fff; padding: 8px; box-shadow: inset 0 0 10px rgba(0,0,0,0.05);">
                 <img src="{{ item.main_image }}" alt="{{ item.data.title }}" style="width: 100%; height: 100%; object-fit: cover; border: 1px solid var(--text-dark);">
@@ -24,7 +37,7 @@
             <p style="font-size: 20px; color: var(--dark-pink); font-weight: bold; margin: 0 0 20px 0; text-align: center;">{{ "%.2f"|format(item.data.price) }} MMK</p>
         </div>
         
-        <div style="text-align: center; margin-top: auto;">
+        <div style="text-align: center; margin-top: auto; padding-top: 15px;">
             {% if item.data.stock > 0 %}
                 <a href="/product/{{ item.data.id }}" class="btn-candy" style="width: 85%; box-sizing: border-box;">Adopt Me 🧸</a>
             {% else %}
