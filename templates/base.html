@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Amigurumi Candy Shop</title>
     
-    <!-- ADDED: Your browser tab logo -->
     <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3063/3063189.png">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -25,6 +24,11 @@
 
         body { background-color: var(--bg-cream); color: var(--text-dark); font-family: var(--font-round); margin: 0; padding: 0; overflow-x: hidden; }
 
+        /* General Hover Transitions */
+        .btn-candy, .product-card, .nav-links a {
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
         .retro-nav {
             display: flex; justify-content: space-between; align-items: center;
             background: white; border: 3px solid var(--text-dark);
@@ -34,8 +38,35 @@
         }
 
         .logo { font-family: var(--font-fancy); font-size: 26px; font-weight: bold; color: var(--dark-pink); text-decoration: none; }
+        .logo:hover { transform: scale(1.05); }
+
         .nav-links { display: flex; gap: 20px; align-items: center; }
         .nav-links a { color: var(--text-dark); text-decoration: none; font-weight: 600; font-size: 15px; }
+        .nav-links a:hover { transform: translateY(-3px); color: var(--dark-pink); }
+
+        /* BUTTON POP EFFECT */
+        .btn-candy {
+            background-color: #A3D2E5; color: var(--text-dark); border: 3px solid var(--text-dark);
+            padding: 10px 20px; font-weight: bold; cursor: pointer;
+            text-decoration: none; display: inline-block;
+            box-shadow: 4px 4px 0 var(--text-dark);
+        }
+        .btn-candy:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0 var(--text-dark);
+            background-color: #92cce3;
+        }
+
+        /* CARD POP EFFECT - Use class="product-card" on your product containers */
+        .product-card {
+            background: white; border: 3px solid var(--text-dark);
+            border-radius: 15px; padding: 20px;
+            box-shadow: 5px 5px 0px var(--text-dark);
+        }
+        .product-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 10px 10px 0px var(--text-dark);
+        }
 
         /* MOBILE RESPONSIVE DESIGN */
         @media (max-width: 768px) {
@@ -44,15 +75,6 @@
             .nav-links a { font-size: 13px; margin-left: 10px; }
         }
 
-        /* Buttons responsive fix */
-        .btn-candy {
-            background-color: #A3D2E5; color: var(--text-dark); border: 3px solid var(--text-dark);
-            padding: 10px 20px; font-weight: bold; cursor: pointer;
-            text-decoration: none; display: inline-block;
-            box-shadow: 4px 4px 0 var(--text-dark);
-        }
-        
-        /* Keep remaining styles as you provided */
         .page-container { width: 100%; min-height: 100vh; background-color: var(--bg-cream); display: flex; flex-direction: column; }
         .gingham-hero { background-color: #fff; background-image: linear-gradient(90deg, rgba(243,174,197,0.3) 50%, transparent 50%), linear-gradient(rgba(243,174,197,0.3) 50%, transparent 50%); background-size: 40px 40px; padding: 50px 40px 100px 40px; text-align: center; border-bottom: 5px solid var(--text-dark); }
         .grid-corkboard { background-image: linear-gradient(var(--wire-gold) 2px, transparent 2px), linear-gradient(90deg, var(--wire-gold) 2px, transparent 2px); background-size: 60px 60px; padding: 80px 40px; flex: 1; }
