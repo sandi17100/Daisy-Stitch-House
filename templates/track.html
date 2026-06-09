@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block hero_section %}
+    <h1 style="font-family: var(--font-fancy); font-size: 42px; color: var(--text-dark); margin:0;">Track Package Box</h1>
+{% endblock %}
+
+{% block content %}
+<div class="scrap-card" style="max-width: 550px; margin: 0 auto; --tilt: -1; background: #FFFEEF;">
+    <p style="text-align: center; font-size: 15px; margin-top: 0;">Enter your code token below to inspect shipping updates:</p>
+    
+    <form method="POST" style="display: flex; gap: 12px; margin: 25px 0;">
+        <input type="text" name="tracking_code" placeholder="e.g. AMI-X7R2A" required style="flex: 1;">
+        <button type="submit" class="btn-candy">Inspect 🔍</button>
+    </form>
+
+    {% if searched %}
+        <hr style="border: 1px dashed var(--text-dark); margin: 25px 0;">
+        {% if order %}
+            <div style="font-size: 16px; line-height: 1.6;">
+                <p><strong>Package Status:</strong> <span style="background: var(--accent-pink); padding: 4px 10px; font-weight: bold; border: 2px solid var(--text-dark); box-shadow: 2px 2px 0 var(--text-dark);">{{ order.status }}</span></p>
+                <p><strong>Tracking:</strong> <code>{{ order.tracking_code }}</code></p>
+                <p><strong>Recipient Name:</strong> {{ order.customer_name }}</p>
+                <p><strong>Delivery Address:</strong> {{ order.shipping_address }}</p>
+                
+                <div style="background: white; border: 2px solid var(--text-dark); padding: 15px; margin-top: 20px;">
+                    <h5 style="margin: 0 0 10px 0; font-size: 15px; font-family: var(--font-fancy); border-bottom: 2px solid var(--text-dark); padding-bottom: 4px;">Box Contents:</h5>
+                    {% for item in order.items %}
+                        <div style="font-size: 14px; display: flex; justify-content: space-between; margin-bottom: 6px;">
+                            <span>{{ item.product_title }} (x{{ item.quantity }})</span>
+                            <span style="font-weight: bold;">{{ "%.2f"|format(item.price * item.quantity) }} MMK</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% else %}
+            <p style="color: #c0392b; text-align: center; font-weight: bold; font-size: 15px;">[!] No tracking signatures match that sequence record.</p>
+        {% endif %}
+    {% endif %}
+</div>
+{% endblock %}

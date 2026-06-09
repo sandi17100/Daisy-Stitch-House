@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="scrap-card" style="max-width: 550px; margin: 40px auto; text-align: center; --tilt: 0.5;">
+    <span style="font-size: 60px; display: inline-block; animation: bobbing 2s infinite alternate;">🌸</span>
+    <h1 style="font-family: var(--font-fancy); color: var(--forest-green); margin: 15px 0 10px 0; font-size: 36px;">Order Adopted!</h1>
+    <p style="font-size: 15px; line-height: 1.5; color: #444;">Your order has been safely filed into our system. Save your tracking sequence token to follow delivery processing milestones:</p>
+    
+    <div style="background: var(--bg-cream); border: 3px dashed var(--text-dark); font-size: 28px; font-weight: bold; padding: 15px; margin: 25px 0; color: var(--dark-pink); letter-spacing: 1.5px; box-shadow: inset 0 0 10px rgba(0,0,0,0.02);">
+        {{ code }}
+    </div>
+    
+    <a href="/" class="btn-candy" style="background: #A3D2E5; font-size: 16px; padding: 12px 30px;">Return to Catalog</a>
+</div>
+{% endblock %}
