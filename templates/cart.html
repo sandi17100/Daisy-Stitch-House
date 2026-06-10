@@ -40,21 +40,30 @@
             <span style="color: var(--dark-pink); font-size: 24px;">{{ "%.2f"|format(grand_total) }} MMK</span>
         </div>
 
+        {% if session.get('customer_id') %}
+            <div style="background: rgba(61, 106, 70, 0.08); border: 2px dashed var(--forest-green); padding: 12px; font-size: 13px; text-align: center; margin-bottom: 20px; color: var(--text-dark); border-radius: 4px;">
+                ✨ <strong>Logged in!</strong> Shipping info will use your registered profile details.
+            </div>
+        {% endif %}
+
         <form action="/checkout" method="POST" style="display: flex; flex-direction: column; gap: 16px;">
             
             <div style="display: flex; flex-direction: column; gap: 4px;">
                 <label for="checkout-name" style="font-size: 13px; font-weight: bold; color: var(--text-dark);">Full Name *</label>
-                <input type="text" id="checkout-name" name="name" required placeholder="Your Full Name" style="width:100%; box-sizing:border-box;">
+                <input type="text" id="checkout-name" name="name" required placeholder="Your Full Name" 
+                       value="{{ session.get('customer_name', '') }}" style="width:100%; box-sizing:border-box;">
             </div>
 
             <div style="display: flex; flex-direction: column; gap: 4px;">
-                <label for="checkout-email" style="font-size: 13px; font-weight: bold; color: var(--text-dark);">Email Address *</label>
-                <input type="email" id="checkout-email" name="email" required placeholder="yourname@example.com" style="width:100%; box-sizing:border-box;">
+                <label for="checkout-phone" style="font-size: 13px; font-weight: bold; color: var(--text-dark);">Phone Number *</label>
+                <input type="tel" id="checkout-phone" name="phone" required placeholder="Your Phone Number" 
+                       value="{{ session.get('customer_phone', '') }}" style="width:100%; box-sizing:border-box;">
             </div>
 
             <div style="display: flex; flex-direction: column; gap: 4px;">
-                <label for="checkout-address" style="font-size: 13px; font-weight: bold; color: var(--text-dark);">Customization Info & Shipping Address *</label>
-                <textarea id="checkout-address" name="address" required rows="4" placeholder="Phone Number and Delivery Address. Add some detail info if you like some customized items." style="width:100%; box-sizing:border-box; font-family: var(--font-round); resize: none;"></textarea>
+                <label for="checkout-address" style="font-size: 13px; font-weight: bold; color: var(--text-dark);">Shipping Address & Item Details *</label>
+                <textarea id="checkout-address" name="address" required rows="4" placeholder="Full Delivery Address and Ask for some Customizations" 
+                          style="width:100%; box-sizing:border-box; font-family: var(--font-round); resize: none;"></textarea>
             </div>
             
             <button type="submit" class="btn-candy" style="width: 100%; text-align: center; background-color: var(--accent-pink); margin-top: 10px; font-size: 16px; padding: 12px 0;">
@@ -64,4 +73,4 @@
     </div>
 </div>
 {% endif %}
-{% endblock %}s
+{% endblock %}
