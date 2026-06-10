@@ -55,7 +55,6 @@
             padding: 50px 40px 100px 40px;
             text-align: center; position: relative;
             border-bottom: 5px solid var(--text-dark);
-            z-index: 10;
         }
 
         .torn-edge {
@@ -72,19 +71,16 @@
             box-shadow: 5px 5px 0px var(--text-dark);
             max-width: 1200px; margin-left: auto; margin-right: auto;
             transition: transform 0.2s ease;
-            z-index: 100;
-            position: relative;
         }
         .retro-nav:hover {
             transform: scale(1.01);
         }
-        .logo { font-family: var(--font-fancy); font-size: 26px; font-weight: bold; color: var(--dark-pink); text-decoration: none; z-index: 100; position: relative; }
+        .logo { font-family: var(--font-fancy); font-size: 26px; font-weight: bold; color: var(--dark-pink); text-decoration: none; }
         
         /* Mobile navigation styles */
         .nav-links {
             display: flex;
             gap: 0;
-            z-index: 100;
         }
         
         .nav-links a { 
@@ -97,7 +93,7 @@
         }
         .nav-links a:hover { color: var(--dark-pink); }
 
-        /* Hamburger menu button for mobile - FIXED Z-INDEX */
+        /* Hamburger menu button for mobile - FIXED */
         .hamburger {
             display: none;
             flex-direction: column;
@@ -106,10 +102,8 @@
             background: none;
             border: none;
             padding: 5px;
-            z-index: 2000;
-            position: relative;
+            z-index: 1001;
             -webkit-tap-highlight-color: transparent;
-            touch-action: manipulation;
         }
         
         .hamburger span {
@@ -222,7 +216,7 @@
             border-radius: 0; font-size: 14px;
         }
 
-        /* FLOATING DAISY STICKERS - LOW Z-INDEX */
+        /* FLOATING DAISY STICKERS */
         .daisy-sticker {
             position: fixed;
             width: 60px;
@@ -262,16 +256,14 @@
         .daisy-7 { top: 55%; left: 28%; animation-delay: 1s; }
         .daisy-8 { top: 85%; right: 20%; animation-delay: 3.5s; }
 
-        /* MOBILE NAVIGATION STYLES - FIXED Z-INDEX TO BE ON TOP */
+        /* MOBILE NAVIGATION STYLES - FIXED */
         @media (max-width: 768px) {
             .retro-nav {
                 padding: 12px 20px;
-                z-index: 2000;
             }
             
             .hamburger {
                 display: flex;
-                z-index: 2000;
             }
             
             .nav-links {
@@ -288,7 +280,7 @@
                 box-shadow: -5px 5px 0px var(--text-dark);
                 transition: right 0.3s ease;
                 gap: 15px;
-                z-index: 2000;
+                z-index: 1000;
                 overflow-y: auto;
             }
             
@@ -305,7 +297,6 @@
                 transition: all 0.2s ease;
                 display: block;
                 -webkit-tap-highlight-color: transparent;
-                cursor: pointer;
             }
             
             .nav-links a:hover {
@@ -487,14 +478,18 @@
 
     </div>
 
-    <!-- FIXED Mobile navigation JavaScript -->
+    <!-- FIXED Mobile navigation JavaScript - using DOMContentLoaded -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const hamburger = document.getElementById('hamburger');
             const navLinks = document.getElementById('nav-links');
             
-            if (!hamburger || !navLinks) return;
+            if (!hamburger || !navLinks) {
+                console.error('Hamburger or navLinks element not found!');
+                return;
+            }
             
+            // Toggle menu on hamburger click
             hamburger.addEventListener('click', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
@@ -502,6 +497,7 @@
                 navLinks.classList.toggle('active');
             });
             
+            // Close menu when clicking on a link
             navLinks.querySelectorAll('a').forEach(function(link) {
                 link.addEventListener('click', function() {
                     hamburger.classList.remove('active');
@@ -509,10 +505,13 @@
                 });
             });
             
+            // Close menu when clicking outside
             document.addEventListener('click', function(e) {
-                if (!hamburger.contains(e.target) && !navLinks.contains(e.target)) {
-                    hamburger.classList.remove('active');
-                    navLinks.classList.remove('active');
+                if (hamburger && navLinks) {
+                    if (!hamburger.contains(e.target) && !navLinks.contains(e.target)) {
+                        hamburger.classList.remove('active');
+                        navLinks.classList.remove('active');
+                    }
                 }
             });
         });
