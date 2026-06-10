@@ -42,29 +42,34 @@
 
         {% if session.get('customer_id') %}
             <div style="background: rgba(61, 106, 70, 0.08); border: 2px dashed var(--forest-green); padding: 12px; font-size: 13px; text-align: center; margin-bottom: 20px; color: var(--text-dark); border-radius: 4px;">
-                ✨ <strong>Logged in as {{ session.get('customer_name') }}!</strong>
-            </div>
-
-            <form action="/checkout" method="POST" style="display: flex; flex-direction: column; gap: 16px;">
-                <input type="hidden" name="name" value="{{ session.get('customer_name') }}">
-                <input type="hidden" name="phone" value="{{ session.get('customer_phone') }}">
-                
-                <div style="display: flex; flex-direction: column; gap: 4px;">
-                    <label for="checkout-address" style="font-size: 13px; font-weight: bold; color: var(--text-dark);">Shipping Address *</label>
-                    <textarea id="checkout-address" name="address" required rows="4" placeholder="Full Delivery Address" style="width:100%; box-sizing:border-box; font-family: var(--font-round); resize: none;"></textarea>
-                </div>
-                
-                <button type="submit" class="btn-candy" style="width: 100%; text-align: center; background-color: var(--accent-pink); margin-top: 10px; font-size: 16px; padding: 12px 0;">
-                    Complete Adoption ✨
-                </button>
-            </form>
-        {% else %}
-            <div style="text-align: center; padding: 20px;">
-                <p style="margin-bottom: 15px; color: var(--text-dark);">Please log in to finalize your adoption.</p>
-                <a href="/customer-login" class="btn-candy" style="display: block; background-color: var(--forest-green); color: white; text-decoration: none; padding: 10px;">Login to Checkout</a>
-                <p style="font-size: 12px; margin-top: 10px;">Don't have an account? <a href="/register">Register here</a></p>
+                ✨ <strong>Logged in!</strong> Shipping info will use your registered profile details.
             </div>
         {% endif %}
+
+        <form action="/checkout" method="POST" style="display: flex; flex-direction: column; gap: 16px;">
+            
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+                <label for="checkout-name" style="font-size: 13px; font-weight: bold; color: var(--text-dark);">Full Name *</label>
+                <input type="text" id="checkout-name" name="name" required placeholder="Your Full Name" 
+                       value="{{ session.get('customer_name', '') }}" style="width:100%; box-sizing:border-box;">
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+                <label for="checkout-phone" style="font-size: 13px; font-weight: bold; color: var(--text-dark);">Phone Number *</label>
+                <input type="tel" id="checkout-phone" name="phone" required placeholder="Your Phone Number" 
+                       value="{{ session.get('customer_phone', '') }}" style="width:100%; box-sizing:border-box;">
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+                <label for="checkout-address" style="font-size: 13px; font-weight: bold; color: var(--text-dark);">Shipping Address & Item Details *</label>
+                <textarea id="checkout-address" name="address" required rows="4" placeholder="Full Delivery Address and Ask for some Customizations" 
+                          style="width:100%; box-sizing:border-box; font-family: var(--font-round); resize: none;"></textarea>
+            </div>
+            
+            <button type="submit" class="btn-candy" style="width: 100%; text-align: center; background-color: var(--accent-pink); margin-top: 10px; font-size: 16px; padding: 12px 0;">
+                Complete Adoption ✨
+            </button>
+        </form>
     </div>
 </div>
 {% endif %}
