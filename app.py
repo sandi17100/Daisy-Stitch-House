@@ -4,6 +4,7 @@ import random
 import string
 from flask import Flask, render_template, request, redirect, url_for, session, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 app.secret_key = 'super_chunky_amigurumi_retro_candy_secret_unlocked'
@@ -19,6 +20,14 @@ app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL or 'sqlite:///amigurumi_can
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
+class User(db.Model):
+    __tablename__ = 'users'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    phone = db.Column(db.String(20), unique=True, nullable=False)
+    password_hash = db.Column(db.String(256), nullable=False)
+    orders = db.relationship('Order', backref='customer_user', lazy=True)
+
 class Product(db.Model):
     __tablename__ = 'products'
     id = db.Column(db.Integer, primary_key=True)
@@ -32,8 +41,9 @@ class Order(db.Model):
     __tablename__ = 'orders'
     id = db.Column(db.Integer, primary_key=True)
     tracking_code = db.Column(db.String(20), unique=True, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True) # Allows guest checkout
     customer_name = db.Column(db.String(100), nullable=False)
-    customer_email = db.Column(db.String(100), nullable=False)  # Requires a value!
+    customer_phone = db.Column(db.String(20), nullable=False)  # Changed from email to phone
     shipping_address = db.Column(db.Text, nullable=False)
     total_price = db.Column(db.Float, nullable=False)
     status = db.Column(db.String(50), default='Pending')
@@ -142,22 +152,23 @@ def checkout():
     if not cart:
         return redirect(url_for('home'))
         
-    # Extract values cleanly and strip empty margins
+    # Extract values from form
     name = request.form.get('name', '').strip()
-    email = request.form.get('email', '').strip()
+    phone = request.form.get('phone', '').strip()
     address = request.form.get('address', '').strip()
     
-    # BACKEND VALIDATION SECURITY LAYER: Fails safely before database hit if fields are missing
-    if not name or not email or not address:
-        return "Error: All processing fields (Name, Email, Address) are strictly required.", 400
+    # 1. Validation: Ensure all fields are present
+    if not name or not phone or not address:
+        return "Error: All processing fields (Name, Phone Number, Address) are strictly required.", 400
 
     grand_total = 0.0
     order_items_to_create = []
     
+    # 2. Process Cart Items (Using Session.get for SQLAlchemy 2.0 compatibility)
     for p_id_str, qty in cart.items():
-        product = Product.query.get(int(p_id_str))
+        product = db.session.get(Product, int(p_id_str))
         if not product or product.stock < qty:
-            return "Error: One of the selected amigurumi items is out of stock!", 400
+            return f"Error: {product.title if product else 'An item'} is out of stock!", 400
         
         grand_total += (product.price * qty)
         order_items_to_create.append(
@@ -170,13 +181,13 @@ def checkout():
         )
         product.stock -= qty
         
+    # 3. Create Order
     tracking = generate_tracking_code()
-    
-    # Constructing Order now ensures customer_email is safely captured
     new_order = Order(
         tracking_code=tracking, 
+        user_id=session.get('customer_id'), # Will be None if guest
         customer_name=name, 
-        customer_email=email, 
+        customer_phone=phone, 
         shipping_address=address, 
         total_price=grand_total
     )
@@ -203,6 +214,70 @@ def track_order():
         order = Order.query.filter_by(tracking_code=code).first()
         searched = True
     return render_template('track.html', order=order, searched=searched, is_admin=is_admin())
+
+# --- CUSTOMER AUTHENTICATION ROUTES ---
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    error = None
+    if request.method == 'POST':
+        name = request.form.get('name')
+        phone = request.form.get('phone')
+        password = request.form.get('password')
+
+        if User.query.filter_by(phone=phone).first():
+            error = "This phone number is already registered! 🍬"
+        else:
+            new_user = User(
+                name=name,
+                phone=phone,
+                password_hash=generate_password_hash(password)
+            )
+            db.session.add(new_user)
+            db.session.commit()
+            
+            # Auto-login after registration
+            session['customer_id'] = new_user.id
+            session['customer_name'] = new_user.name
+            session['customer_phone'] = new_user.phone
+            return redirect(url_for('my_orders'))
+            
+    return render_template('register.html', error=error, is_admin=is_admin())
+
+@app.route('/customer-login', methods=['GET', 'POST'])
+def customer_login():
+    error = None
+    if request.method == 'POST':
+        phone = request.form.get('phone')
+        password = request.form.get('password')
+        user = User.query.filter_by(phone=phone).first()
+
+        if user and check_password_hash(user.password_hash, password):
+            session['customer_id'] = user.id
+            session['customer_name'] = user.name
+            session['customer_phone'] = user.phone
+            return redirect(url_for('my_orders'))
+        else:
+            error = "Invalid phone number or password! 🍬"
+            
+    return render_template('customer_login.html', error=error, is_admin=is_admin())
+
+@app.route('/customer-logout')
+def customer_logout():
+    session.pop('customer_id', None)
+    session.pop('customer_name', None)
+    session.pop('customer_phone', None)
+    return redirect(url_for('home'))
+
+@app.route('/my-orders')
+def my_orders():
+    if 'customer_id' not in session:
+        return redirect(url_for('customer_login'))
+        
+    user_orders = Order.query.filter_by(user_id=session['customer_id']).order_by(Order.created_at.desc()).all()
+    return render_template('my_orders.html', orders=user_orders, is_admin=is_admin())
+
+# --- ADMIN ROUTES ---
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
