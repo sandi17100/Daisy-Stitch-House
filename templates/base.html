@@ -93,7 +93,7 @@
         }
         .nav-links a:hover { color: var(--dark-pink); }
 
-        /* Hamburger menu button for mobile */
+        /* Hamburger menu button for mobile - FIXED */
         .hamburger {
             display: none;
             flex-direction: column;
@@ -102,6 +102,8 @@
             background: none;
             border: none;
             padding: 5px;
+            z-index: 1001;
+            -webkit-tap-highlight-color: transparent;
         }
         
         .hamburger span {
@@ -110,6 +112,7 @@
             background-color: var(--text-dark);
             border-radius: 2px;
             transition: all 0.3s ease;
+            display: block;
         }
         
         .hamburger.active span:nth-child(1) {
@@ -124,7 +127,7 @@
             transform: rotate(-45deg) translate(6px, -6px);
         }
 
-        /* FIXED GRID CORKBOARD: Completely flattened background texture with layered design depth */
+        /* FIXED GRID CORKBOARD */
         .grid-corkboard {
             background-image: 
                 radial-gradient(circle at 15% 20%, rgba(232, 90, 132, 0.04) 0%, transparent 40%),
@@ -144,7 +147,6 @@
             z-index: 3;
         }
 
-        /* FIXED WASHI TAPE BACKGROUND BADGES: Textured accent points instead of loose floating icons */
         .washi-tape-left {
             position: absolute;
             top: 25px; left: -15px;
@@ -254,7 +256,7 @@
         .daisy-7 { top: 55%; left: 28%; animation-delay: 1s; }
         .daisy-8 { top: 85%; right: 20%; animation-delay: 3.5s; }
 
-        /* MOBILE NAVIGATION STYLES */
+        /* MOBILE NAVIGATION STYLES - FIXED */
         @media (max-width: 768px) {
             .retro-nav {
                 padding: 12px 20px;
@@ -268,17 +270,18 @@
                 position: fixed;
                 top: 0;
                 right: -100%;
-                width: 250px;
+                width: 280px;
                 height: 100vh;
                 background: white;
                 border: 3px solid var(--text-dark);
                 border-radius: 0;
                 flex-direction: column;
-                padding: 80px 30px 30px;
+                padding: 100px 30px 30px;
                 box-shadow: -5px 5px 0px var(--text-dark);
                 transition: right 0.3s ease;
                 gap: 15px;
                 z-index: 1000;
+                overflow-y: auto;
             }
             
             .nav-links.active {
@@ -288,10 +291,12 @@
             .nav-links a {
                 margin-left: 0;
                 margin-bottom: 15px;
-                font-size: 16px;
-                padding: 10px;
+                font-size: 18px;
+                padding: 15px;
                 border-radius: 8px;
                 transition: all 0.2s ease;
+                display: block;
+                -webkit-tap-highlight-color: transparent;
             }
             
             .nav-links a:hover {
@@ -317,9 +322,7 @@
     <!-- FLOATING DAISY STICKERS -->
     <div class="daisy-sticker daisy-1">
         <svg viewBox="0 0 100 100">
-            <!-- Yellow center -->
             <circle cx="50" cy="50" r="15" fill="#FFD700"/>
-            <!-- White petals -->
             <ellipse cx="50" cy="25" rx="12" ry="18" fill="#FFFFFF" stroke="#FFE4B5" stroke-width="1"/>
             <ellipse cx="50" cy="75" rx="12" ry="18" fill="#FFFFFF" stroke="#FFE4B5" stroke-width="1"/>
             <ellipse cx="25" cy="50" rx="18" ry="12" fill="#FFFFFF" stroke="#FFE4B5" stroke-width="1"/>
@@ -328,7 +331,6 @@
             <ellipse cx="68" cy="32" rx="14" ry="14" fill="#FFFFFF" stroke="#FFE4B5" stroke-width="1" transform="rotate(45 68 32)"/>
             <ellipse cx="32" cy="68" rx="14" ry="14" fill="#FFFFFF" stroke="#FFE4B5" stroke-width="1" transform="rotate(45 32 68)"/>
             <ellipse cx="68" cy="68" rx="14" ry="14" fill="#FFFFFF" stroke="#FFE4B5" stroke-width="1" transform="rotate(-45 68 68)"/>
-            <!-- Pink center detail -->
             <circle cx="50" cy="50" r="8" fill="#FFB6C1"/>
         </svg>
     </div>
@@ -438,7 +440,7 @@
                 <a href="/" class="logo">iloveamigurumi.🍬</a>
                 
                 <!-- Hamburger menu button for mobile -->
-                <button class="hamburger" id="hamburger">
+                <button class="hamburger" id="hamburger" aria-label="Toggle menu">
                     <span></span>
                     <span></span>
                     <span></span>
@@ -476,30 +478,42 @@
 
     </div>
 
-    <!-- Mobile navigation JavaScript -->
+    <!-- FIXED Mobile navigation JavaScript - using DOMContentLoaded -->
     <script>
-        const hamburger = document.getElementById('hamburger');
-        const navLinks = document.getElementById('nav-links');
-        
-        hamburger.addEventListener('click', () => {
-            hamburger.classList.toggle('active');
-            navLinks.classList.toggle('active');
-        });
-        
-        // Close menu when clicking on a link
-        navLinks.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', () => {
-                hamburger.classList.remove('active');
-                navLinks.classList.remove('active');
-            });
-        });
-        
-        // Close menu when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!hamburger.contains(e.target) && !navLinks.contains(e.target)) {
-                hamburger.classList.remove('active');
-                navLinks.classList.remove('active');
+        document.addEventListener('DOMContentLoaded', function() {
+            const hamburger = document.getElementById('hamburger');
+            const navLinks = document.getElementById('nav-links');
+            
+            if (!hamburger || !navLinks) {
+                console.error('Hamburger or navLinks element not found!');
+                return;
             }
+            
+            // Toggle menu on hamburger click
+            hamburger.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                hamburger.classList.toggle('active');
+                navLinks.classList.toggle('active');
+            });
+            
+            // Close menu when clicking on a link
+            navLinks.querySelectorAll('a').forEach(function(link) {
+                link.addEventListener('click', function() {
+                    hamburger.classList.remove('active');
+                    navLinks.classList.remove('active');
+                });
+            });
+            
+            // Close menu when clicking outside
+            document.addEventListener('click', function(e) {
+                if (hamburger && navLinks) {
+                    if (!hamburger.contains(e.target) && !navLinks.contains(e.target)) {
+                        hamburger.classList.remove('active');
+                        navLinks.classList.remove('active');
+                    }
+                }
+            });
         });
     </script>
 </body>
