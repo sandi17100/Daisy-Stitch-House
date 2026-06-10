@@ -164,7 +164,6 @@ def remove_from_cart(product_id):
     return redirect(url_for('view_cart'))
 
 @app.route('/checkout', methods=['POST'])
-@login_required
 def checkout():
     cart = session.get('cart', {})
     if not cart:
