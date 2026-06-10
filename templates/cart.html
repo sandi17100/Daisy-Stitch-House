@@ -1,76 +1,98 @@
 {% extends 'base.html' %}
 
 {% block hero_section %}
-    <h1 style="font-family: var(--font-fancy); font-size: 42px; color: var(--forest-green); margin:0; font-style: italic;">Your Adoption Box</h1>
-    <p style="font-size: 16px; margin: 5px 0 0 0;">Review your upcoming crochet companions and prepare their journey home.</p>
+    <h1 style="font-family: var(--font-fancy); font-size: 42px; color: var(--forest-green); margin: 0; font-style: italic;">
+        Your Adoption Box
+    </h1>
+    <p style="font-size: 16px; margin: 5px 0 0 0;">
+        Review your upcoming crochet companions and prepare their journey home.
+    </p>
 {% endblock %}
 
 {% block content %}
-{% if not cart_items %}
-    <div class="scrap-card" style="text-align: center; padding: 50px; --tilt: 1; max-width: 600px; margin: 0 auto;">
-        <h3 style="font-size: 24px; margin-top: 10px;">Your basket box is empty! 📦</h3>
-        <a href="/" class="btn-candy" style="margin-top: 20px; background-color: #CBE5A3;">Return to Catalog</a>
-    </div>
-{% else %}
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 40px; align-items: start; margin-top: 10px;">
-    
-    <div style="display: flex; flex-direction: column; gap: 25px;">
-        {% for item in cart_items %}
-        <div class="scrap-card" style="--tilt: -0.5; display: flex; gap: 20px; align-items: center; padding: 20px; background: white;">
-            <img src="{{ item.main_image }}" style="width: 80px; height: 80px; object-fit: cover; border: 2px solid var(--text-dark); border-radius: 4px;">
-            <div style="flex: 1;">
-                <h4 style="margin: 0; font-family: var(--font-fancy); font-size: 18px; color: var(--text-dark);">{{ item.product.title }}</h4>
-                <p style="margin: 5px 0 0 0; font-size: 14px; color: #555;">Qty: {{ item.quantity }} × MMK{{ "%.2f"|format(item.product.price) }}</p>
+    {% if not cart_items %}
+        <div class="scrap-card" style="text-align: center; padding: 50px; --tilt: 1; max-width: 600px; margin: 0 auto;">
+            <h3 style="font-size: 24px; margin-top: 10px;">Your basket box is empty! 📦</h3>
+            <a href="/" class="btn-candy" style="margin-top: 20px; background-color: #CBE5A3;">
+                Return to Catalog
+            </a>
+        </div>
+    {% else %}
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 40px; align-items: start; margin-top: 10px;">
+            <div style="display: flex; flex-direction: column; gap: 25px;">
+                {% for item in cart_items %}
+                    <div class="scrap-card" style="--tilt: -0.5; display: flex; gap: 20px; align-items: center; padding: 20px; background: white;">
+                        <img src="{{ item.main_image }}" style="width: 80px; height: 80px; object-fit: cover; border: 2px solid var(--text-dark); border-radius: 4px;">
+                        <div style="flex: 1;">
+                            <h4 style="margin: 0; font-family: var(--font-fancy); font-size: 18px; color: var(--text-dark);">
+                                {{ item.product.title }}
+                            </h4>
+                            <p style="margin: 5px 0 0 0; font-size: 14px; color: #555;">
+                                Qty: {{ item.quantity }} × MMK{{ "%.2f"|format(item.product.price) }}
+                            </p>
+                        </div>
+                        <div style="text-align: right;">
+                            <p style="font-weight: bold; margin: 0 0 8px 0; color: var(--text-dark); font-size: 16px;">
+                                {{ "%.2f"|format(item.line_total) }} MMK
+                            </p>
+                            <a href="/cart/remove/{{ item.product.id }}" style="color: #c0392b; font-size: 13px; text-decoration: underline; font-weight: bold;">
+                                Remove
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
             </div>
-            <div style="text-align: right;">
-                <p style="font-weight: bold; margin: 0 0 8px 0; color: var(--text-dark); font-size: 16px;">{{ "%.2f"|format(item.line_total) }} MMK</p>
-                <a href="/cart/remove/{{ item.product.id }}" style="color: #c0392b; font-size: 13px; text-decoration: underline; font-weight: bold;">Remove</a>
+
+            <div class="scrap-card" style="--tilt: 0.5; background: #FFFEEF; position: sticky; top: 20px;">
+                <h3 style="margin-top: 10px; font-family: var(--font-fancy); font-size: 24px; color: var(--forest-green); border-bottom: 2px dashed var(--wire-gold); padding-bottom: 8px;">
+                    Summary Details
+                </h3>
+
+                <div style="font-size: 20px; font-weight: bold; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center;">
+                    <span>Grand Total:</span>
+                    <span style="color: var(--dark-pink); font-size: 24px;">
+                        {{ "%.2f"|format(grand_total) }} MMK
+                    </span>
+                </div>
+
+                {% if session.get('customer_id') %}
+                    <div style="background: rgba(61, 106, 70, 0.08); border: 2px dashed var(--forest-green); padding: 12px; font-size: 13px; text-align: center; margin-bottom: 20px; color: var(--text-dark); border-radius: 4px;">
+                        ✨ <strong>Logged in!</strong> Shipping info will use your registered profile details.
+                    </div>
+                {% else %}
+                    <div style="background: rgba(243, 174, 197, 0.1); border: 2px dashed var(--dark-pink); padding: 15px; font-size: 13px; text-align: left; margin-bottom: 20px; color: var(--text-dark); border-radius: 4px;">
+                        <p style="margin: 0 0 10px 0;">
+                            <strong>📦 Guest Checkout:</strong> Complete your adoption by providing your details below
+                        </p>
+
+                        <p style="margin: 0;">
+                            <strong>✨ Recommended:</strong>
+                            <a href="{{ url_for('register') }}" style="color: var(--dark-pink); font-weight: bold; text-decoration: underline;">Sign up</a>
+                            or
+                            <a href="{{ url_for('customer_login') }}" style="color: var(--dark-pink); font-weight: bold; text-decoration: underline;">Log in</a>
+                            to save your order history and view your crochet companions anytime!
+                        </p>
+                    </div>
+                {% endif %}
+
+                <form action="/checkout" method="POST" style="display: flex; flex-direction: column; gap: 16px;">
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                        <label for="checkout-name" style="font-size: 13px; font-weight: bold; color: var(--text-dark);">Full Name *</label>
+                        <input type="text" id="checkout-name" name="name" required placeholder="Your Full Name" value="{{ session.get('customer_name', '') }}" style="width: 100%; box-sizing: border-box;">
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                        <label for="checkout-phone" style="font-size: 13px; font-weight: bold; color: var(--text-dark);">Phone Number *</label>
+                        <input type="tel" id="checkout-phone" name="phone" required placeholder="Your Phone Number" value="{{ session.get('customer_phone', '') }}" style="width: 100%; box-sizing: border-box;">
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                        <label for="checkout-address" style="font-size: 13px; font-weight: bold; color: var(--text-dark);">Shipping Address & Details *</label>
+                        <textarea id="checkout-address" name="address" required rows="4" placeholder="Delivery address or custom notes" style="width: 100%; box-sizing: border-box; font-family: var(--font-round); resize: none;"></textarea>
+                    </div>
+                    <button type="submit" class="btn-candy" style="width: 100%; text-align: center; background-color: var(--accent-pink); margin-top: 10px; font-size: 16px; padding: 12px 0;">
+                        Complete Adoption ✨
+                    </button>
+                </form>
             </div>
         </div>
-        {% endfor %}
-    </div>
-
-    <div class="scrap-card" style="--tilt: 0.5; background: #FFFEEF; position: sticky; top: 20px;">
-        <h3 style="margin-top:10px; font-family: var(--font-fancy); font-size: 24px; color: var(--forest-green); border-bottom: 2px dashed var(--wire-gold); padding-bottom: 8px;">
-            Summary Details
-        </h3>
-        
-        <div style="font-size: 20px; font-weight: bold; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center;">
-            <span>Grand Total:</span> 
-            <span style="color: var(--dark-pink); font-size: 24px;">{{ "%.2f"|format(grand_total) }} MMK</span>
-        </div>
-
-        {% if session.get('customer_id') %}
-            <div style="background: rgba(61, 106, 70, 0.08); border: 2px dashed var(--forest-green); padding: 12px; font-size: 13px; text-align: center; margin-bottom: 20px; color: var(--text-dark); border-radius: 4px;">
-                ✨ <strong>Logged in!</strong> Shipping info will use your registered profile details.
-            </div>
-        {% endif %}
-
-        <form action="/checkout" method="POST" style="display: flex; flex-direction: column; gap: 16px;">
-            
-            <div style="display: flex; flex-direction: column; gap: 4px;">
-                <label for="checkout-name" style="font-size: 13px; font-weight: bold; color: var(--text-dark);">Full Name *</label>
-                <input type="text" id="checkout-name" name="name" required placeholder="Your Full Name" 
-                       value="{{ session.get('customer_name', '') }}" style="width:100%; box-sizing:border-box;">
-            </div>
-
-            <div style="display: flex; flex-direction: column; gap: 4px;">
-                <label for="checkout-phone" style="font-size: 13px; font-weight: bold; color: var(--text-dark);">Phone Number *</label>
-                <input type="tel" id="checkout-phone" name="phone" required placeholder="Your Phone Number" 
-                       value="{{ session.get('customer_phone', '') }}" style="width:100%; box-sizing:border-box;">
-            </div>
-
-            <div style="display: flex; flex-direction: column; gap: 4px;">
-                <label for="checkout-address" style="font-size: 13px; font-weight: bold; color: var(--text-dark);">Shipping Address & Item Details *</label>
-                <textarea id="checkout-address" name="address" required rows="4" placeholder="Full Delivery Address and Ask for some Customizations" 
-                          style="width:100%; box-sizing:border-box; font-family: var(--font-round); resize: none;"></textarea>
-            </div>
-            
-            <button type="submit" class="btn-candy" style="width: 100%; text-align: center; background-color: var(--accent-pink); margin-top: 10px; font-size: 16px; padding: 12px 0;">
-                Complete Adoption ✨
-            </button>
-        </form>
-    </div>
-</div>
-{% endif %}
+    {% endif %}
 {% endblock %}
