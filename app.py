@@ -2,6 +2,8 @@ import os
 from datetime import datetime
 import random
 import string
+from functools import wraps
+
 from flask import Flask, render_template, request, redirect, url_for, session, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -12,6 +14,7 @@ app.secret_key = 'super_chunky_amigurumi_retro_candy_secret_unlocked'
 ADMIN_USERNAME = "admin"
 ADMIN_PASSWORD = "candy123"
 
+# --- DATABASE CONFIGURATION ---
 DATABASE_URL = os.environ.get('DATABASE_URL')
 if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
@@ -20,6 +23,16 @@ app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL or 'sqlite:///amigurumi_can
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
+# --- LOGIN DECORATOR ---
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'customer_id' not in session:
+            return redirect(url_for('customer_login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+# --- MODELS ---
 class User(db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
@@ -33,22 +46,22 @@ class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(150), nullable=False)
     price = db.Column(db.Float, nullable=False)
-    description = db.Column(db.Text)  
-    image_url = db.Column(db.Text)   
+    description = db.Column(db.Text)
+    image_url = db.Column(db.Text)
     stock = db.Column(db.Integer, default=5)
 
 class Order(db.Model):
     __tablename__ = 'orders'
     id = db.Column(db.Integer, primary_key=True)
     tracking_code = db.Column(db.String(20), unique=True, nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True) # Allows guest checkout
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)  # guest checkout allowed
     customer_name = db.Column(db.String(100), nullable=False)
-    customer_phone = db.Column(db.String(20), nullable=False)  # Changed from email to phone
+    customer_phone = db.Column(db.String(20), nullable=False)
     shipping_address = db.Column(db.Text, nullable=False)
     total_price = db.Column(db.Float, nullable=False)
     status = db.Column(db.String(50), default='Pending')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    
+
     items = db.relationship('OrderItem', backref='order', lazy=True, cascade="all, delete-orphan")
 
 class OrderItem(db.Model):
@@ -60,6 +73,7 @@ class OrderItem(db.Model):
     price = db.Column(db.Float, nullable=False)
     quantity = db.Column(db.Integer, default=1)
 
+# --- UTILS & SEEDING ---
 def generate_tracking_code():
     chars = ''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
     return f"AMI-{chars}"
@@ -80,6 +94,7 @@ with app.app_context():
 def is_admin():
     return session.get('is_admin') == True
 
+# --- CORE ROUTES ---
 @app.route('/')
 def home():
     products = Product.query.all()
@@ -102,31 +117,27 @@ def product_detail(product_id):
 def add_to_cart(product_id):
     product = Product.query.get_or_404(product_id)
     qty = int(request.form.get('quantity', 1))
-    
+
     if qty > product.stock:
         return jsonify({"status": "error", "message": f"Only {product.stock} items left!"}), 400
-    
-    # 1. Ensure the cart dictionary exists in the session
+
     if 'cart' not in session:
         session['cart'] = {}
-        
-    # 2. Retrieve the cart from the session
+
     cart = session['cart']
-    
-    # 3. Update the cart
     p_id_str = str(product_id)
     cart[p_id_str] = cart.get(p_id_str, 0) + qty
-    
-    # 4. CRITICAL: Explicitly tell Flask the session has changed
-    session.modified = True 
-    
+    session['cart'] = cart
+    session.modified = True
+
     return redirect(url_for('view_cart'))
-    
+
 @app.route('/cart')
 def view_cart():
     cart = session.get('cart', {})
     cart_items = []
     grand_total = 0.0
+
     for p_id_str, qty in cart.items():
         product = Product.query.get(int(p_id_str))
         if product:
@@ -134,7 +145,13 @@ def view_cart():
             main_img = imgs[0] if imgs else 'https://via.placeholder.com/150'
             line_total = product.price * qty
             grand_total += line_total
-            cart_items.append({'product': product, 'quantity': qty, 'line_total': line_total, 'main_image': main_img})
+            cart_items.append({
+                'product': product,
+                'quantity': qty,
+                'line_total': line_total,
+                'main_image': main_img
+            })
+
     return render_template('cart.html', cart_items=cart_items, grand_total=grand_total, is_admin=is_admin())
 
 @app.route('/cart/remove/<int:product_id>')
@@ -147,57 +164,54 @@ def remove_from_cart(product_id):
     return redirect(url_for('view_cart'))
 
 @app.route('/checkout', methods=['POST'])
+@login_required
 def checkout():
     cart = session.get('cart', {})
     if not cart:
         return redirect(url_for('home'))
-        
-    # Extract values from form
+
     name = request.form.get('name', '').strip()
     phone = request.form.get('phone', '').strip()
     address = request.form.get('address', '').strip()
-    
-    # 1. Validation: Ensure all fields are present
+
     if not name or not phone or not address:
         return "Error: All processing fields (Name, Phone Number, Address) are strictly required.", 400
 
     grand_total = 0.0
     order_items_to_create = []
-    
-    # 2. Process Cart Items (Using Session.get for SQLAlchemy 2.0 compatibility)
+
     for p_id_str, qty in cart.items():
         product = db.session.get(Product, int(p_id_str))
         if not product or product.stock < qty:
             return f"Error: {product.title if product else 'An item'} is out of stock!", 400
-        
+
         grand_total += (product.price * qty)
         order_items_to_create.append(
             OrderItem(
-                product_id=product.id, 
-                product_title=product.title, 
-                price=product.price, 
+                product_id=product.id,
+                product_title=product.title,
+                price=product.price,
                 quantity=qty
             )
         )
         product.stock -= qty
-        
-    # 3. Create Order
+
     tracking = generate_tracking_code()
     new_order = Order(
-        tracking_code=tracking, 
-        user_id=session.get('customer_id'), # Will be None if guest
-        customer_name=name, 
-        customer_phone=phone, 
-        shipping_address=address, 
+        tracking_code=tracking,
+        user_id=session.get('customer_id'),
+        customer_name=name,
+        customer_phone=phone,
+        shipping_address=address,
         total_price=grand_total
     )
-    
+
     for item in order_items_to_create:
         new_order.items.append(item)
-        
+
     db.session.add(new_order)
     db.session.commit()
-    
+
     session.pop('cart', None)
     return redirect(url_for('order_success', code=tracking))
 
@@ -216,7 +230,6 @@ def track_order():
     return render_template('track.html', order=order, searched=searched, is_admin=is_admin())
 
 # --- CUSTOMER AUTHENTICATION ROUTES ---
-
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     error = None
@@ -235,13 +248,12 @@ def register():
             )
             db.session.add(new_user)
             db.session.commit()
-            
-            # Auto-login after registration
+
             session['customer_id'] = new_user.id
             session['customer_name'] = new_user.name
             session['customer_phone'] = new_user.phone
             return redirect(url_for('my_orders'))
-            
+
     return render_template('register.html', error=error, is_admin=is_admin())
 
 @app.route('/customer-login', methods=['GET', 'POST'])
@@ -259,7 +271,7 @@ def customer_login():
             return redirect(url_for('my_orders'))
         else:
             error = "Invalid phone number or password! 🍬"
-            
+
     return render_template('customer_login.html', error=error, is_admin=is_admin())
 
 @app.route('/customer-logout')
@@ -270,15 +282,12 @@ def customer_logout():
     return redirect(url_for('home'))
 
 @app.route('/my-orders')
+@login_required
 def my_orders():
-    if 'customer_id' not in session:
-        return redirect(url_for('customer_login'))
-        
     user_orders = Order.query.filter_by(user_id=session['customer_id']).order_by(Order.created_at.desc()).all()
     return render_template('my_orders.html', orders=user_orders, is_admin=is_admin())
 
 # --- ADMIN ROUTES ---
-
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     error = None
