@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block hero_section %}
+    <h1 style="font-family: var(--font-fancy); color: var(--forest-green);">Customer Registry</h1>
+{% endblock %}
+
+{% block content %}
+<div class="scrap-card" style="padding: 20px;">
+    <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+            <tr style="border-bottom: 2px solid var(--text-dark);">
+                <th style="padding: 10px;">Name</th>
+                <th style="padding: 10px;">Phone</th>
+                <th style="padding: 10px;">Total Orders</th>
+                <th style="padding: 10px;">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr style="border-bottom: 1px solid #ddd; text-align: center;">
+                <td style="padding: 10px;">{{ user.name }}</td>
+                <td style="padding: 10px;">{{ user.phone }}</td>
+                <td style="padding: 10px;"><strong>{{ user.order_count }}</strong></td>
+                <td style="padding: 10px;">
+                    <form action="/admin/user/delete/{{ user.id }}" method="POST" onsubmit="return confirm('ဒီ User ကို ဖျက်မှာ သေချာပါသလား?');">
+                        <button type="submit" style="background: #E85A84; color: white; border: none; padding: 5px 10px; cursor: pointer;">Remove</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
