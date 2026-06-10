@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block hero_section %}
+    <h1 style="font-family: var(--font-fancy); font-size: 42px; color: var(--text-dark); margin:0;">Welcome back, {{ session.customer_name }}!</h1>
+{% endblock %}
+
+{% block content %}
+<div style="display: flex; flex-direction: column; gap: 30px;">
+    <h2 style="font-family: var(--font-fancy); color: var(--dark-pink); margin: 0;">Your Adoption History</h2>
+
+    {% if not orders %}
+        <div class="scrap-card" style="text-align: center; color: #999; --tilt: 0; max-width: 600px; margin: 0 auto;">You haven't adopted any amigurumi companions yet.</div>
+    {% endif %}
+    
+    {% for order in orders %}
+    <div class="scrap-card" style="--tilt: 0.3; border-left: 10px solid var(--accent-pink);">
+        <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 20px;">
+            <div style="flex: 1; min-width: 250px;">
+                <h4 style="margin: 0 0 8px 0; font-family: var(--font-fancy); font-size: 22px; color: var(--text-dark);">Token: <span style="background: #FFFEEF; padding: 2px 6px; border: 2px solid var(--text-dark);">{{ order.tracking_code }}</span></h4>
+                <p style="margin: 4px 0; font-size: 15px;"><strong>Date:</strong> {{ order.created_at.strftime('%Y-%m-%d') }}</p>
+                <p style="margin: 4px 0; font-size: 15px;"><strong>Address:</strong> {{ order.shipping_address }}</p>
+                <p style="margin: 8px 0 0 0; font-size: 15px;">
+                    <strong>Status:</strong> 
+                    <span style="background: {% if order.status == 'Delivered' %}#CBE5A3{% else %}#A3D2E5{% endif %}; padding: 3px 8px; font-weight: bold; border: 2px solid var(--text-dark);">{{ order.status }}</span>
+                </p>
+            </div>
+            
+            <div style="background: #FFFEEF; padding: 15px; border: 2px solid var(--text-dark); min-width: 220px; font-size: 14px; box-shadow: 3px 3px 0 var(--text-dark);">
+                <h5 style="margin: 0 0 6px 0; font-family: var(--font-fancy); border-bottom: 1px dashed var(--text-dark);">Items Manifest</h5>
+                {% for item in order.items %}
+                    <div style="margin-bottom: 4px;">• {{ item.product_title }} <span style="font-weight:bold; color:var(--dark-pink);">x{{ item.quantity }}</span></div>
+                {% endfor %}
+                <div style="text-align: right; font-weight: bold; margin-top: 10px; color: var(--dark-pink); font-size: 16px; border-top: 1px solid var(--text-dark); padding-top: 4px;">Total: {{ "%.2f"|format(order.total_price) }} MMK</div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

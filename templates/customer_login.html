@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="scrap-card" style="max-width: 400px; margin: 60px auto; --tilt: -0.5; text-align: center; background: #FFFEEF;">
+    <h3 style="font-family: var(--font-fancy); color: var(--dark-pink); margin-top: 0; font-size: 26px;">Customer Login</h3>
+    {% if error %}<p style="color: red; font-size: 13px; font-weight: bold;">[!] {{ error }}</p>{% endif %}
+    
+    <form method="POST" style="display: flex; flex-direction: column; gap: 15px; margin-top: 20px;">
+        <input type="text" name="phone" placeholder="Phone Number" required style="width: 100%; box-sizing: border-box; padding: 12px;">
+        <input type="password" name="password" placeholder="Password" required style="width: 100%; box-sizing: border-box; padding: 12px;">
+        <button type="submit" class="btn-candy" style="background: #A3D2E5; width: 100%; font-size: 16px;">Log In 🧸</button>
+    </form>
+
+    <div style="margin-top: 25px; border-top: 2px dashed var(--text-dark); padding-top: 15px;">
+        <p style="font-size: 14px;">Don't have an account?</p>
+        <a href="/register" class="btn-candy" style="background: var(--bg-cream); font-size: 14px; padding: 8px 16px;">Register Here</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="scrap-card" style="max-width: 400px; margin: 60px auto; --tilt: 0.5; text-align: center; background: #FFFEEF;">
+    <h3 style="font-family: var(--font-fancy); color: var(--forest-green); margin-top: 0; font-size: 26px;">Join the Family</h3>
+    <p style="font-size: 14px; margin-bottom: 20px;">Create an account to track all your adoptions!</p>
+    {% if error %}<p style="color: red; font-size: 13px; font-weight: bold;">[!] {{ error }}</p>{% endif %}
+    
+    <form method="POST" style="display: flex; flex-direction: column; gap: 15px;">
+        <input type="text" name="name" placeholder="Your Full Name" required style="width: 100%; box-sizing: border-box; padding: 12px;">
+        <input type="text" name="phone" placeholder="Phone Number" required style="width: 100%; box-sizing: border-box; padding: 12px;">
+        <input type="password" name="password" placeholder="Create a Password" required style="width: 100%; box-sizing: border-box; padding: 12px;">
+        <button type="submit" class="btn-candy" style="background: var(--accent-pink); width: 100%; font-size: 16px;">Sign Up ✨</button>
+    </form>
+
+    <div style="margin-top: 20px;">
+        <a href="/customer-login" style="color: var(--text-dark); font-size: 14px; font-weight: bold;">Already have an account? Log in</a>
+    </div>
+</div>
+{% endblock %}
