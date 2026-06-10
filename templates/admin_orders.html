@@ -10,13 +10,21 @@
     {% endif %}
     
     {% for order in orders %}
-    <div class="scrap-card" style="--tilt: 0.3; border-left: 10px solid var(--forest-green);">
-        <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 20px;">
+    <div class="scrap-card" style="--tilt: 0.3; border-left: 10px solid {% if order.status == 'Delivered' %}var(--forest-green){% else %}var(--dark-pink){% endif %};">
+        <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: start; gap: 20px;">
+            
             <div style="flex: 1; min-width: 250px;">
                 <h4 style="margin: 0 0 8px 0; font-family: var(--font-fancy); font-size: 22px; color: var(--forest-green);">Token: {{ order.tracking_code }}</h4>
-                <!-- CHANGED: Displaying order.customer_phone instead of an email handle -->
-                <p style="margin: 4px 0; font-size: 15px;"><strong>Customer:</strong> {{ order.customer_name }} ({{ order.customer_phone }})</p>
+                <p style="margin: 4px 0; font-size: 15px;"><strong>Customer:</strong> {{ order.customer_name }} 
+                    {% if order.user_id %}
+                        <span style="font-size: 12px; background: #CBE5A3; padding: 2px 6px; border-radius: 4px; font-weight: bold;">Registered</span>
+                    {% else %}
+                        <span style="font-size: 12px; background: #ddd; padding: 2px 6px; border-radius: 4px;">Guest</span>
+                    {% endif %}
+                </p>
+                <p style="margin: 4px 0; font-size: 15px;"><strong>Phone:</strong> {{ order.customer_phone }}</p>
                 <p style="margin: 4px 0; font-size: 15px;"><strong>Address:</strong> {{ order.shipping_address }}</p>
+                <p style="margin: 4px 0; font-size: 13px; color: #666;"><em>Placed on: {{ order.created_at.strftime('%Y-%m-%d %H:%M') }}</em></p>
             </div>
             
             <div style="background: #FFFEEF; padding: 15px; border: 2px solid var(--text-dark); min-width: 220px; font-size: 14px; box-shadow: 3px 3px 0 var(--text-dark);">
@@ -28,14 +36,14 @@
             </div>
 
             <div style="min-width: 180px;">
-                <form action="/admin/order/{{ order.id }}/update" method="POST" style="display: flex; gap: 8px; align-items: center;">
+                <form action="/admin/order/{{ order.id }}/update" method="POST" style="display: flex; flex-direction: column; gap: 8px;">
                     <select name="status" style="padding: 8px; font-size: 13px; border: 2px solid var(--text-dark); background: white;">
                         <option value="Pending" {% if order.status == 'Pending' %}selected{% endif %}>Pending</option>
                         <option value="Processing" {% if order.status == 'Processing' %}selected{% endif %}>Processing</option>
                         <option value="Shipped" {% if order.status == 'Shipped' %}selected{% endif %}>Shipped</option>
                         <option value="Delivered" {% if order.status == 'Delivered' %}selected{% endif %}>Delivered</option>
                     </select>
-                    <button type="submit" class="btn-candy" style="padding: 8px 14px; font-size: 13px; background: #CBE5A3;">Update</button>
+                    <button type="submit" class="btn-candy" style="padding: 8px 14px; font-size: 13px; background: #CBE5A3; cursor: pointer;">Update Status</button>
                 </form>
             </div>
         </div>
