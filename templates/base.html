@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dasiy Stitch House</title>
+    <title>Daisy Stitch House</title>
     
-    <!-- Favicon for browser tab logo -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23F3AEC5'/><circle cx='50' cy='50' r='15' fill='%23FFD700'/><ellipse cx='50' cy='25' rx='12' ry='18' fill='%23FFFFFF'/><ellipse cx='50' cy='75' rx='12' ry='18' fill='%23FFFFFF'/><ellipse cx='25' cy='50' rx='18' ry='12' fill='%23FFFFFF'/><ellipse cx='75' cy='50' rx='18' ry='12' fill='%23FFFFFF'/><circle cx='50' cy='50' r='8' fill='%23FFB6C1'/></svg>">
     <link rel="shortcut icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23F3AEC5'/><circle cx='50' cy='50' r='15' fill='%23FFD700'/><ellipse cx='50' cy='25' rx='12' ry='18' fill='%23FFFFFF'/><ellipse cx='50' cy='75' rx='12' ry='18' fill='%23FFFFFF'/><ellipse cx='25' cy='50' rx='18' ry='12' fill='%23FFFFFF'/><ellipse cx='75' cy='50' rx='18' ry='12' fill='%23FFFFFF'/><circle cx='50' cy='50' r='8' fill='%23FFB6C1'/></svg>">
     
@@ -328,7 +327,6 @@
     </style>
 </head>
 <body>
-    <!-- FLOATING DAISY STICKERS -->
     <div class="daisy-sticker daisy-1">
         <svg viewBox="0 0 100 100">
             <circle cx="50" cy="50" r="15" fill="#FFD700"/>
@@ -448,7 +446,6 @@
             <nav class="retro-nav">
                 <a href="/" class="logo">I LOVE AMIGURUMI🍬</a>
                 
-                <!-- Hamburger menu button for mobile -->
                 <button class="hamburger" id="hamburger" aria-label="Toggle menu">
                     <span></span>
                     <span></span>
@@ -459,9 +456,17 @@
                     <a href="/">Catalog</a>
                     <a href="/cart">Box ({% if session.get('cart') %}{{ session.get('cart')|length }}{% else %}0{% endif %})</a>
                     <a href="/track">Track</a>
+                    
+                    {% if session.get('customer_id') %}
+                        <a href="/my-orders" style="color: var(--dark-pink); font-weight: bold;">My Orders</a>
+                        <a href="/customer-logout">Logout</a>
+                    {% else %}
+                        <a href="/customer-login" style="color: var(--dark-pink);">Login / Register</a>
+                    {% endif %}
+                    
                     {% if is_admin %}
                         <a href="/admin/orders" style="color: var(--forest-green); font-weight: bold;">Orders</a>
-                        <a href="/logout" style="color: #666;">Logout</a>
+                        <a href="/logout" style="color: #666;">Admin Logout</a>
                     {% else %}
                         <a href="/login" style="opacity: .4; font-size: 11px;">Admin</a>
                     {% endif %}
@@ -487,7 +492,6 @@
 
     </div>
 
-    <!-- FIXED Mobile navigation JavaScript -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const hamburger = document.getElementById('hamburger');
