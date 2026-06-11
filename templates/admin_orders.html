@@ -1,49 +1,64 @@
 {% extends 'base.html' %}
+
 {% block hero_section %}
-    <h1 style="font-family: var(--font-fancy); font-size: 42px; color: var(--text-dark); margin:0;">Order Manifest Log</h1>
+    <h1 style="font-family: var(--font-fancy); font-size: 42px; color: var(--text-dark); margin: 0;">Order Manifest Log</h1>
 {% endblock %}
 
 {% block content %}
 <div style="display: flex; flex-direction: column; gap: 30px;">
     {% if not orders %}
-        <div class="scrap-card" style="text-align: center; color: #999; --tilt: 0; max-width: 600px; margin: 0 auto;">No active processing elements logged.</div>
+        <div class="scrap-card" style="text-align: center; color: #999; --tilt: 0; max-width: 600px; margin: 0 auto;">
+            No active processing elements logged.
+        </div>
     {% endif %}
     
     {% for order in orders %}
-    <div class="scrap-card" style="--tilt: 0.3; border-left: 10px solid {% if order.status == 'Delivered' %}var(--forest-green){% else %}var(--dark-pink){% endif %};">
-        <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: start; gap: 20px;">
-            
+    <div class="scrap-card" style="--tilt: 0.3; border-left: 10px solid var(--forest-green);">
+        <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 20px;">
             <div style="flex: 1; min-width: 250px;">
-                <h4 style="margin: 0 0 8px 0; font-family: var(--font-fancy); font-size: 22px; color: var(--forest-green);">Token: {{ order.tracking_code }}</h4>
-                <p style="margin: 4px 0; font-size: 15px;"><strong>Customer:</strong> {{ order.customer_name }} 
-                    {% if order.user_id %}
-                        <span style="font-size: 12px; background: #CBE5A3; padding: 2px 6px; border-radius: 4px; font-weight: bold;">Registered</span>
-                    {% else %}
-                        <span style="font-size: 12px; background: #ddd; padding: 2px 6px; border-radius: 4px;">Guest</span>
-                    {% endif %}
+                <h4 style="margin: 0 0 8px 0; font-family: var(--font-fancy); font-size: 22px; color: var(--forest-green);">
+                    Token: {{ order.tracking_code }}
+                </h4>
+                <p style="margin: 4px 0; font-size: 15px;">
+                    <strong>Customer:</strong> {{ order.customer_name }} ({{ order.customer_phone }})
                 </p>
-                <p style="margin: 4px 0; font-size: 15px;"><strong>Phone:</strong> {{ order.customer_phone }}</p>
-                <p style="margin: 4px 0; font-size: 15px;"><strong>Address:</strong> {{ order.shipping_address }}</p>
-                <p style="margin: 4px 0; font-size: 13px; color: #666;"><em>Placed on: {{ order.created_at.strftime('%Y-%m-%d %H:%M') }}</em></p>
+                <p style="margin: 4px 0; font-size: 15px;">
+                    <strong>Address:</strong> {{ order.shipping_address }}
+                </p>
             </div>
             
             <div style="background: #FFFEEF; padding: 15px; border: 2px solid var(--text-dark); min-width: 220px; font-size: 14px; box-shadow: 3px 3px 0 var(--text-dark);">
-                <h5 style="margin: 0 0 6px 0; font-family: var(--font-fancy); border-bottom: 1px dashed var(--text-dark);">Items Manifest</h5>
+                <h5 style="margin: 0 0 6px 0; font-family: var(--font-fancy); border-bottom: 1px dashed var(--text-dark);">
+                    Items Manifest
+                </h5>
                 {% for item in order.items %}
-                    <div style="margin-bottom: 4px;">• {{ item.product_title }} <span style="font-weight:bold; color:var(--dark-pink);">x{{ item.quantity }}</span></div>
+                    <div style="margin-bottom: 4px;">
+                        • {{ item.product_title }} <span style="font-weight: bold; color: var(--dark-pink);">x{{ item.quantity }}</span>
+                    </div>
                 {% endfor %}
-                <div style="text-align: right; font-weight: bold; margin-top: 10px; color: var(--dark-pink); font-size: 16px; border-top: 1px solid var(--text-dark); padding-top: 4px;">Total: {{ "%.2f"|format(order.total_price) }} MMK</div>
+                <div style="text-align: right; font-weight: bold; margin-top: 10px; color: var(--dark-pink); font-size: 16px; border-top: 1px solid var(--text-dark); padding-top: 4px;">
+                    Total: {{ "%.2f"|format(order.total_price) }} MMK
+                </div>
             </div>
 
-            <div style="min-width: 180px;">
+            <div style="min-width: 180px; display: flex; flex-direction: column; gap: 10px;">
                 <form action="/admin/order/{{ order.id }}/update" method="POST" style="display: flex; flex-direction: column; gap: 8px;">
                     <select name="status" style="padding: 8px; font-size: 13px; border: 2px solid var(--text-dark); background: white;">
                         <option value="Pending" {% if order.status == 'Pending' %}selected{% endif %}>Pending</option>
                         <option value="Processing" {% if order.status == 'Processing' %}selected{% endif %}>Processing</option>
                         <option value="Shipped" {% if order.status == 'Shipped' %}selected{% endif %}>Shipped</option>
                         <option value="Delivered" {% if order.status == 'Delivered' %}selected{% endif %}>Delivered</option>
+                        <option value="Cancelled" {% if order.status == 'Cancelled' %}selected{% endif %} style="color: #c0392b;">Cancelled</option>
                     </select>
-                    <button type="submit" class="btn-candy" style="padding: 8px 14px; font-size: 13px; background: #CBE5A3; cursor: pointer;">Update Status</button>
+                    <button type="submit" class="btn-candy" style="padding: 8px 14px; font-size: 13px; background: #CBE5A3; cursor: pointer;">
+                        Update Status
+                    </button>
+                </form>
+
+                <form action="/admin/order/{{ order.id }}/delete" method="POST" onsubmit="return confirm('Are you sure you want to permanently delete this order?');">
+                    <button type="submit" style="width: 100%; padding: 8px; font-size: 13px; background: #ffcccc; border: 1px solid #c0392b; color: #c0392b; cursor: pointer; font-weight: bold;">
+                        Delete Order
+                    </button>
                 </form>
             </div>
         </div>
