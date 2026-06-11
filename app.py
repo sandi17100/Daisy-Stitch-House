@@ -280,6 +280,18 @@ def customer_logout():
     session.pop('customer_phone', None)
     return redirect(url_for('home'))
 
+@app.route('/admin/order/<int:order_id>/delete', methods=['POST'])
+def delete_order(order_id):
+    if not is_admin():
+        abort(403)
+    order = Order.query.get_or_404(order_id)
+    
+    # We don't need to manually delete OrderItems because 
+    # you set cascade="all, delete-orphan" in the Order model.
+    db.session.delete(order)
+    db.session.commit()
+    return redirect(url_for('admin_orders'))
+
 @app.route('/my-orders')
 @login_required
 def my_orders():
