@@ -21,7 +21,7 @@
             <span style="position: absolute; top: -10px; left: -10px; background: var(--bg-cream); border: 2px solid var(--text-dark); border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; box-shadow: 2px 2px 0 var(--text-dark);">{{ loop.index }}</span>
 
             <h3 style="font-family: var(--font-fancy); font-size: 24px; margin: 20px 0 5px 0; text-align: center;">{{ item.data.title }}</h3>
-            <p style="font-size: 20px; color: var(--dark-pink); font-weight: bold; margin: 0 0 20px 0; text-align: center;">{{ "%.2f"|format(item.data.price) }} MMK</p>
+            <p style="font-size: 20px; color: var(--dark-pink); font-weight: bold; margin: 0 0 20px 0; text-align: center;">{{ "%.0f"|format(item.data.price) }} MMK</p>
         </div>
         
         <div style="text-align: center; margin-top: auto;">
