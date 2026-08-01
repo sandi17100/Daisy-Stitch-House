@@ -286,8 +286,7 @@ def delete_order(order_id):
         abort(403)
     order = Order.query.get_or_404(order_id)
     
-    # We don't need to manually delete OrderItems because 
-    # you set cascade="all, delete-orphan" in the Order model.
+
     db.session.delete(order)
     db.session.commit()
     return redirect(url_for('admin_orders'))
@@ -370,13 +369,13 @@ def delete_product(product_id):
     db.session.delete(product)
     db.session.commit()
     return redirect(url_for('home'))
-# ၁။ Admin အတွက် User စာရင်းနှင့် Order အရေအတွက် ကြည့်ရန် Route
+
 @app.route('/admin/users')
 def admin_users():
     if not is_admin():
         return redirect(url_for('login'))
     
-    # User အားလုံးကို ဆွဲထုတ်ပြီး Order အရေအတွက်ပါ တွက်ချက်ခြင်း
+    
     users = User.query.all()
     user_data = []
     for user in users:
@@ -384,7 +383,7 @@ def admin_users():
             'id': user.id,
             'name': user.name,
             'phone': user.phone,
-            'order_count': len(user.orders) # Relationship ကိုသုံးပြီး Order အရေအတွက် ယူခြင်း
+            'order_count': len(user.orders) 
         })
     
     return render_template('admin_users.html', users=user_data, is_admin=is_admin())
@@ -396,8 +395,7 @@ def delete_user(user_id):
         abort(403)
     user = User.query.get_or_404(user_id)
     
-    # User ကိုဖျက်ရင် သူ့ရဲ့ Order တွေပါ ပြဿနာမတက်အောင် အရင်စစ်ဆေးပါ (သို့) cascade လုပ်ပါ
-    # ဒီနေရာမှာတော့ ရိုးရှင်းအောင် အရင်ဖျက်လိုက်ပါမယ်
+    
     db.session.delete(user)
     db.session.commit()
     return redirect(url_for('admin_users'))
